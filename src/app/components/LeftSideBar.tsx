@@ -7,7 +7,7 @@ import {
   BsEnvelope,
   BsThreeDots,
 } from "react-icons/bs";
-import { HiEnvelope } from "react-icons/hi2";
+
 import { HiOutlineHashtag } from "react-icons/hi";
 import Link from "next/link";
 
