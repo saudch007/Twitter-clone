@@ -1,12 +1,21 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 
 const Tweet = () => {
+  const [Tweet, setTweet] = useState("");
+
+  function handleTweet(e: React.ChangeEvent<HTMLInputElement>): void {
+    e.preventDefault();
+    setTweet(e.target.value);
+    console.log("Tweet successful = ", Tweet);
+  }
+
   return (
     <div className="border-t-[0.5px] px-4 border-b-[0.5px] flex items-stretch py-4  space-x-2 border-gray-600 relative">
       <div className="w-10 h-10 bg-slate-400 rounded-full flex-none"></div>
       <div className="flex flex-col w-full h-full">
         <input
+          onChange={handleTweet}
           type="text"
           className="w-full h-full placeholder:text-2xl placeholder:text-gray-600 bg-transparent outline-none border-b-[0.5px] border-gray-600 p-4 border-none"
           placeholder="What's happening?!"
