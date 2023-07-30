@@ -31,7 +31,7 @@ const Tweet = () => {
       setTimeout(() => {
         isButtonDisabled = false;
         submitBtn.disabled = false;
-      }, 10000);
+      }, 5000);
     }
 
     submitBtn.addEventListener("click", disableSubmitButton);
