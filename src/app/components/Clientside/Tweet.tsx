@@ -17,8 +17,30 @@ const Tweet = () => {
     setTweet(event.target.value);
   };
 
+  const submitBtn = document.getElementById(
+    "submitButton"
+  ) as HTMLButtonElement;
+
+  let isButtonDisabled = false;
+
+  function disableSubmitButton() {
+    if (!isButtonDisabled) {
+      isButtonDisabled = true;
+      submitBtn.disabled = true;
+
+      setTimeout(() => {
+        isButtonDisabled = false;
+        submitBtn.disabled = false;
+      }, 10000);
+    }
+
+    submitBtn.addEventListener("click", disableSubmitButton);
+    submitBtn.addEventListener("submit", disableSubmitButton);
+  }
+
   const handleSubmit: MouseEventHandler = async (event) => {
     event.preventDefault();
+
     const { error } = await supabase
       .from("tweet_table")
       .insert({ tweet: Tweet });
@@ -28,6 +50,8 @@ const Tweet = () => {
     } else {
       console.log(Tweet + "-> Tweet Successful");
     }
+
+    disableSubmitButton(); // to disable buttonn on submission of tweet
   };
 
   const handleUpload = async (e: ChangeEvent<HTMLInputElement>) => {
@@ -67,6 +91,7 @@ const Tweet = () => {
               <button
                 onClick={handleSubmit}
                 type="submit"
+                id="submitButton"
                 className="w-full rounded-full bg-primary mt-2 px-4 py-2 text-lg text-center font-bold hover:bg-opacity-70 transition duration-200"
               >
                 Tweet
