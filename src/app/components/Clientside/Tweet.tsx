@@ -53,7 +53,14 @@ const Tweet = () => {
     event.preventDefault();
 
     try {
-      await Promise.all([handleTweet(), handleUpload()]);
+      const syntheticEvent = new Event(
+        "change"
+      ) as unknown as React.ChangeEvent<HTMLInputElement>;
+
+      await Promise.all([
+        handleTweet(syntheticEvent as React.ChangeEvent<HTMLInputElement>),
+        handleUpload(syntheticEvent as React.ChangeEvent<HTMLInputElement>),
+      ]);
       console.log("Both events completed");
     } catch (error) {
       console.error("An error occured", error);
