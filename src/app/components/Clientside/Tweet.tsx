@@ -10,11 +10,11 @@ import { resolve } from "path";
 
 const Tweet = () => {
   const [Tweet, setTweet] = useState("");
+  const [EventState, setEventState] = useState<ChangeEvent<HTMLInputElement>>();
+  const [FileState, setFileState] = useState<File>();
 
-  const handleTweet = (event: ChangeEvent<HTMLInputElement>) => {
+  function TweetHandle() {
     return new Promise<void>(async (resolve) => {
-      event.preventDefault();
-      setTweet(event.target.value);
       const { error } = await supabase
         .from("tweet_table")
         .insert({ tweet: Tweet });
@@ -26,6 +26,11 @@ const Tweet = () => {
       }
       resolve();
     });
+  }
+
+  const handleTweet = (event: ChangeEvent<HTMLInputElement>) => {
+    event.preventDefault();
+    setTweet(event.target.value);
   };
 
   const submitBtn = document.getElementById(
@@ -53,14 +58,9 @@ const Tweet = () => {
     event.preventDefault();
 
     try {
-      const syntheticEvent = new Event(
-        "change"
-      ) as unknown as React.ChangeEvent<HTMLInputElement>;
+      const syntheticEvent = EventState as ChangeEvent<HTMLInputElement>;
 
-      await Promise.all([
-        handleTweet(syntheticEvent as React.ChangeEvent<HTMLInputElement>),
-        handleUpload(syntheticEvent as React.ChangeEvent<HTMLInputElement>),
-      ]);
+      await Promise.all([TweetHandle(), Uploader(FileState)]);
       console.log("Both events completed");
     } catch (error) {
       console.error("An error occured", error);
@@ -69,22 +69,26 @@ const Tweet = () => {
     disableSubmitButton(); // to disable buttonn on submission of tweet
   };
 
+  async function Uploader(file: File | undefined) {
+    const { data, error } = await supabase.storage
+      .from("tweet_files")
+      .upload("public" + file?.name, file as File);
+    if (data) {
+      console.log(data);
+    } else if (error) {
+      console.log(error);
+    }
+  }
+
   const handleUpload = (e: ChangeEvent<HTMLInputElement>) => {
     return new Promise<void>(async (resolve) => {
-      let file;
+      var file;
 
       if (e.target.files) {
         file = e.target.files[0];
       }
 
-      const { data, error } = await supabase.storage
-        .from("tweet_files")
-        .upload("public" + file?.name, file as File);
-      if (data) {
-        console.log(data);
-      } else if (error) {
-        console.log(error);
-      }
+      setFileState(file);
 
       resolve();
     });
@@ -141,7 +145,10 @@ const Tweet = () => {
             accept="image/*"
             className="hidden"
             id="file_input"
-            onChange={handleUpload}
+            onChange={(e) => {
+              handleUpload(e);
+              setEventState(e);
+            }}
           />
         </div>
       </div>
