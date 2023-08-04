@@ -1,12 +1,56 @@
-import React from "react";
+"use client";
+import React, { useEffect, useState } from "react";
 import { BsChat, BsDot, BsThreeDots } from "react-icons/bs";
 import { AiOutlineHeart, AiOutlineRetweet } from "react-icons/ai";
 import { IoStatsChartOutline, IoShareOutline } from "react-icons/io5";
 
+import supabase from "../../supabase";
+import { Url } from "next/dist/shared/lib/router/router";
+
 const ShowTweets = () => {
+  const [tweets, setTweets] = useState<{ tweet: any }[]>([]);
+  useEffect(() => {
+    const fetchTweets = async () => {
+      const { data, error } = await supabase
+        .from("tweet_table")
+        .select("tweet");
+
+      if (data) {
+        setTweets(data);
+      } else if (error) {
+        console.error(error);
+      }
+    };
+
+    fetchTweets();
+  }, [tweets]);
+
+  ////////// Images //////////
+
+  const [imageUrls, setImageUrls] = useState<Url[]>([]);
+  const image_initial = process.env.IMAGE_URL_INITIAL as string;
+
+  useEffect(() => {
+    const fetchImages = async () => {
+      try {
+        const { data } = await supabase.storage
+          .from("tweet_files")
+          .getPublicUrl(image_initial);
+
+        if (data) {
+          setImageUrls([data.publicUrl]);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchImages();
+  }, [imageUrls]);
+
   return (
     <div className="flex flex-col">
-      {Array.from({ length: 5 }).map((_, i) => (
+      {tweets.map((elem, i) => (
         <div
           key={i}
           className="border-b-[0.5px] border-gray-600 p-4 flex space-x-4"
@@ -29,15 +73,16 @@ const ShowTweets = () => {
                 <BsThreeDots />
               </div>
             </div>
-            <div className="text-white text-base py-2">
-              Lorem ipsum dolor, sit amet consectetur adipisicing elit. Cumque
-              nesciunt praesentium facilis suscipit voluptas aut delectus
-              asperiores quam velit eius perferendis sint consequatur voluptate,
-              earum repellat corrupti maxime recusandae esse quia laborum
-              aliquid dolor blanditiis dolorem commodi. Iste illo quam
-              perferendis.
+            <div className="text-white text-base py-2">{elem.tweet}</div>
+            <div className=" aspect-square w-full h-96 rounded-xl">
+              {imageUrls.map((elem_url, i) => (
+                <img
+                  key={i}
+                  src={elem_url.toString()}
+                  className="object-cover rounded-xl"
+                />
+              ))}
             </div>
-            <div className="bg-slate-400 aspect-square w-full h-96 rounded-xl"></div>
 
             <div className="flex items-center justify-around w-full">
               <div className="rounded-full hover:bg-white/10 transition duration-200 p-3 cursor-pointer">
